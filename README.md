@@ -1,6 +1,8 @@
 # 麦门小助手（mcd-assistant）
 
 > 一个 Skill 三种吃法：帮你决定吃什么、帮你把每一单点到最便宜、帮你把消费记录变成有趣的月报和人格鉴定。
+>
+> 仓库：https://github.com/meowrain/mcd-assistant · 在线试算（免 Token）：https://meowrain.github.io/mcd-assistant/demo/index.html
 
 基于麦当劳官方 MCP Server（mcd-mcp）的菜单、营养、优惠券、活动、订单、抽奖能力打造的 WorkBuddy Skill。所有价格、菜单、订单数据均实时来自 MCP，脚本只做确定性计算，不编造数据。
 
@@ -60,7 +62,7 @@ cp -r mcd-assistant <你的项目目录>/.workbuddy/skills/
 > 用户：给我一张能发群的卡
 > 小助手：运行 persona_card.py 生成 HTML 人格鉴定卡（效果见 examples/persona_card_demo.html），截图即分享
 
-**在线试算（免 Token）**：浏览器直接打开 `demo/index.html`（或部署后的 GitHub Pages 链接）——神单计算器可编辑购物车和优惠券实时算券，「今天吃什么」可调约束摇盲盒，「麦门月报」内置示例订单一键生成人格卡。无需 MCP、无需 Token、数据不出浏览器。
+**在线试算（免 Token）**：访问 https://meowrain.github.io/mcd-assistant/demo/index.html （GitHub Pages 已部署；也可浏览器直接打开 `demo/index.html`）——神单计算器可编辑购物车和优惠券实时算券，「今天吃什么」可调约束摇盲盒，「麦门月报」内置示例订单一键生成人格卡。无需 MCP、无需 Token、数据不出浏览器。
 
 ## 本地运行 Demo
 
@@ -82,7 +84,8 @@ python scripts/persona_card.py --demo --out card.html
 start demo/index.html        # Windows
 open demo/index.html         # macOS
 
-# 方式二：部署 GitHub Pages（推送到仓库后在 Settings → Pages 开启）
+# 方式二：GitHub Pages（已部署）
+# https://meowrain.github.io/mcd-assistant/demo/index.html
 ```
 
 示例输出见 [examples/](examples/) 目录。真实使用时，由 Skill 按 SKILL.md 流程从 MCP 取数、组装 JSON 后传入 `--data`。
