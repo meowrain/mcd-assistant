@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>麦门小助手 · 在线试算（免 Token Demo）</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #FAF6EC; color: #292929; line-height: 1.6;
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+}
+.wrap { max-width: 860px; margin: 0 auto; padding: 28px 16px 72px; }
+.hero {
+  background: #FFC72C; border-radius: 16px; padding: 22px 26px;
+  display: flex; align-items: center; gap: 16px;
+}
+.hero h1 { font-size: 22px; font-weight: 500; letter-spacing: 1px; }
+.hero p { font-size: 13px; color: #6B4E12; margin-top: 2px; }
+.tabs { display: flex; gap: 8px; margin: 20px 0 4px; flex-wrap: wrap; }
+.tab {
+  padding: 8px 18px; border-radius: 999px; border: 1px solid #EAE3D2; background: #FFF;
+  font-size: 14px; cursor: pointer; color: #5C5548;
+}
+.tab.active { background: #292929; border-color: #292929; color: #FFC72C; font-weight: 500; }
+.panel { display: none; }
+.panel.active { display: block; }
+.card {
+  background: #FFF; border: 1px solid #EAE3D2; border-radius: 12px;
+  padding: 18px 20px; margin-top: 16px;
+}
+.card-title { font-size: 15px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.card-title .ops { display: flex; gap: 8px; }
+.btn {
+  border: 1px solid #EAE3D2; background: #FFF; border-radius: 8px; padding: 5px 12px;
+  font-size: 13px; cursor: pointer; color: #292929;
+}
+.btn:hover { border-color: #FFC72C; }
+.btn.primary { background: #FFC72C; border-color: #FFC72C; font-weight: 500; }
+.btn.dark { background: #292929; border-color: #292929; color: #FFC72C; }
+table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+th { text-align: left; font-size: 12px; color: #8A8378; font-weight: 400; padding: 6px 6px; border-bottom: 1px solid #EFE7D2; }
+td { padding: 6px 6px; border-bottom: 1px dashed #EFE7D2; font-size: 14px; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+input[type="text"], input[type="number"], select, textarea {
+  width: 100%; border: 1px solid #EAE3D2; border-radius: 8px; padding: 6px 10px;
+  font-size: 14px; font-family: inherit; background: #FFFDF8; color: #292929;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: #FFC72C; }
+textarea { min-height: 140px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
+.row-del { border: none; background: none; color: #C1540A; cursor: pointer; font-size: 14px; padding: 2px 6px; }
+.hint { font-size: 12px; color: #8A8378; margin-top: 10px; }
+.big-nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+.big-num { background: #FAF6EC; border: 1px solid #EFE7D2; border-radius: 12px; padding: 12px 14px; }
+.big-num .k { font-size: 12px; color: #8A8378; }
+.big-num .v { font-size: 22px; font-weight: 500; margin-top: 2px; }
+.big-num .v small { font-size: 13px; font-weight: 400; color: #8A8378; }
+.steps { margin-top: 14px; }
+.steps li { font-size: 14px; padding: 7px 0 7px 22px; position: relative; list-style: none; border-bottom: 1px dashed #EFE7D2; }
+.steps li:last-child { border-bottom: none; }
+.steps li::before { content: attr(data-i); position: absolute; left: 0; top: 8px; width: 16px; height: 16px; border-radius: 50%; background: #FFC72C; color: #292929; font-size: 11px; text-align: center; line-height: 16px; }
+.suggest { margin-top: 12px; background: #FFF7DF; border: 1px solid #F5D98B; border-radius: 10px; padding: 10px 14px; font-size: 13px; }
+.menu-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.chip { border: 1px solid #EAE3D2; background: #FFF; border-radius: 999px; padding: 4px 12px; font-size: 13px; cursor: pointer; user-select: none; }
+.chip.on { background: #292929; border-color: #292929; color: #FFC72C; }
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 14px; }
+.controls label { font-size: 12px; color: #8A8378; display: block; margin-bottom: 4px; }
+.radio-row { display: flex; gap: 14px; align-items: center; font-size: 14px; }
+.radio-row label { display: flex; gap: 5px; align-items: center; color: #292929; font-size: 14px; margin: 0; }
+.pick-result { margin-top: 16px; background: #292929; color: #FFF; border-radius: 12px; padding: 18px 20px; }
+.pick-result .name { font-size: 22px; font-weight: 500; color: #FFC72C; }
+.pick-result .meta { font-size: 13px; color: #BDB8AC; margin-top: 2px; }
+.pick-result .reason { font-size: 14px; margin-top: 10px; color: #F2EDE0; }
+.pick-result .alts { font-size: 13px; margin-top: 8px; color: #BDB8AC; }
+.pc-head { background: #FFC72C; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-radius: 12px 12px 0 0; }
+.pc-body { padding: 22px; }
+.pc-name { font-size: 28px; font-weight: 500; letter-spacing: 2px; }
+.pc-tag { font-size: 14px; color: #5C5548; margin-top: 6px; }
+.pc-roast { margin-top: 12px; border-left: 4px solid #FFC72C; padding-left: 12px; }
+.pc-roast p { font-size: 13px; color: #4A4438; margin-top: 4px; }
+.pc-roast p:first-child { margin-top: 0; }
+.footer { margin-top: 28px; font-size: 12px; color: #8A8378; text-align: center; line-height: 1.8; }
+.ok { color: #3B6D11; font-weight: 500; }
+.err { color: #A32D2D; font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <svg width="44" height="34" viewBox="0 0 100 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 72 V44 Q14 12 38 12 Q62 12 62 44 V72" stroke="#292929" stroke-width="13" stroke-linecap="round"/>
+      <path d="M62 72 V44 Q62 12 86 12" stroke="#292929" stroke-width="13" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <h1>麦门小助手 · 在线试算</h1>
+      <p>免 Token · 纯前端单文件 · 数据不出浏览器 · 逻辑与仓库 scripts/ 完全一致</p>
+    </div>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="coupon">省钱军师 · 神单计算器</button>
+    <button class="tab" data-tab="meal">今天吃什么</button>
+    <button class="tab" data-tab="report">麦门月报 · 人格鉴定</button>
+  </nav>
+
+  <section id="tab-coupon" class="panel active">
+    <div class="card">
+      <div class="card-title">购物车
+        <span class="ops">
+          <button class="btn" id="cart-preset">载入示例购物车</button>
+          <button class="btn" id="cart-clear">清空</button>
+        </span>
+      </div>
+      <table>
+        <thead><tr><th style="width:46%">单品</th><th>单价（元）</th><th>数量</th><th></th></tr></thead>
+        <tbody id="cart-items"></tbody>
+      </table>
+      <button class="btn" id="cart-add" style="margin-top:10px">+ 添加单品</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">可用优惠券
+        <span class="ops"><button class="btn" id="coupon-preset">载入示例券</button><button class="btn" id="coupon-clear">清空</button></span>
+      </div>
+      <table>
+        <thead><tr><th style="width:34%">券名</th><th>类型</th><th>门槛（元）</th><th>力度</th><th></th></tr></thead>
+        <tbody id="cart-coupons"></tbody>
+      </table>
+      <button class="btn" id="coupon-add" style="margin-top:10px">+ 添加优惠券</button>
+      <p class="hint">类型说明：满减券 = 满「门槛」减「力度」元；折扣券 = 满「门槛」打「力度」折（填 0.85 表示 85 折）。多张满减券默认可叠加，折扣券取力度最大的一张。</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">加购候选（凑单用）
+        <span class="ops"><button class="btn" id="addon-clear">清空</button></span>
+      </div>
+      <table>
+        <thead><tr><th style="width:46%">单品</th><th>单价（元）</th><th></th><th></th></tr></thead>
+        <tbody id="cart-addons"></tbody>
+      </table>
+      <button class="btn" id="addon-add" style="margin-top:10px">+ 添加加购候选</button>
+    </div>
+
+    <div class="card" id="coupon-result"></div>
+  </section>
+
+  <section id="tab-meal" class="panel">
+    <div class="card">
+      <div class="card-title">候选菜单（内置示例数据，共 <span id="menu-count">0</span> 款）</div>
+      <table>
+        <thead><tr><th>单品</th><th>价格</th><th>热量</th><th>标签</th><th>时段</th></tr></thead>
+        <tbody id="menu-body"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">约束条件</div>
+      <div class="controls">
+        <div><label>预算上限（元，留空不限）</label><input type="number" id="meal-budget" min="0" step="1" value="30"></div>
+        <div><label>热量上限（千卡，留空不限）</label><input type="number" id="meal-cal" min="0" step="10"></div>
+        <div><label>用餐时段</label>
+          <select id="meal-period">
+            <option value="">不限</option>
+            <option>早餐</option><option>午餐</option><option>下午茶</option><option>晚餐</option><option>夜宵</option>
+          </select>
+        </div>
+        <div><label>最近吃过的（逗号分隔）</label><input type="text" id="meal-recent" placeholder="如：巨无霸, 薯条(大)"></div>
+      </div>
+      <div style="margin-top:14px">
+        <label style="font-size:12px;color:#8A8378;display:block;margin-bottom:6px">忌口标签</label>
+        <div class="menu-chips" id="meal-tags"></div>
+      </div>
+      <div class="controls" style="margin-top:14px">
+        <div><label>决策模式</label>
+          <div class="radio-row">
+            <label><input type="radio" name="meal-mode" value="smart" checked> 智能推荐</label>
+            <label><input type="radio" name="meal-mode" value="dice"> 盲盒摇奖</label>
+          </div>
+        </div>
+        <div><label>盲盒种子（可复现）</label><input type="number" id="meal-seed" value="7"></div>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:10px">
+        <button class="btn primary" id="meal-run">帮我决定</button>
+        <button class="btn" id="meal-reroll">再摇一次</button>
+      </div>
+    </div>
+
+    <div id="meal-result"></div>
+  </section>
+
+  <section id="tab-report" class="panel">
+    <div class="card">
+      <div class="card-title">订单数据
+        <span class="ops">
+          <button class="btn" id="report-preset">载入示例订单（2026-10）</button>
+          <button class="btn" id="report-parse">解析并生成</button>
+        </span>
+      </div>
+      <textarea id="report-input" placeholder='粘贴订单 JSON：{"period":"2026-10","orders":[{"date":"2026-10-03T12:30:00","amount":44.0,"items":[{"name":"麦辣鸡腿堡","price":21.5,"calories":520,"qty":1}]}]}'></textarea>
+      <p class="hint">格式与 scripts/report_generator.py 的输入完全一致；本页只在浏览器内解析，不会上传任何数据。</p>
+    </div>
+    <div id="report-result"></div>
+  </section>
+
+  <div class="footer">
+    麦门小助手（mcd-assistant）· 麦当劳 MCP Skill 开发赛参赛作品<br>
+    本页为免 Token 演示：所有计算在本地完成，真实使用时由 Skill 调用麦当劳 MCP 取数后驱动同名脚本。
+  </div>
+</div>
+
+<script>
+"use strict";
+
+var MENU = [
+  { name: "麦辣鸡腿堡", price: 21.5, calories: 520, tags: ["辣", "鸡肉", "汉堡"], periods: ["午餐", "晚餐", "全天"] },
+  { name: "巨无霸", price: 24.0, calories: 530, tags: ["牛肉", "汉堡"], periods: ["午餐", "晚餐", "全天"] },
+  { name: "板烧鸡腿堡", price: 22.0, calories: 430, tags: ["鸡肉", "汉堡"], periods: ["午餐", "晚餐", "全天"] },
+  { name: "双层吉士堡", price: 14.5, calories: 480, tags: ["牛肉", "汉堡"], periods: ["午餐", "晚餐", "全天"] },
+  { name: "麦香鱼", price: 20.0, calories: 380, tags: ["鱼肉", "汉堡"], periods: ["午餐", "晚餐", "全天"] },
+  { name: "薯条(大)", price: 13.5, calories: 510, tags: ["油炸", "小食"], periods: ["午餐", "晚餐", "下午茶", "夜宵", "全天"] },
+  { name: "麦乐鸡(5块)", price: 12.5, calories: 285, tags: ["鸡肉", "小食"], periods: ["午餐", "晚餐", "下午茶", "夜宵", "全天"] },
+  { name: "可口可乐(中)", price: 9.0, calories: 180, tags: ["饮料"], periods: ["全天"] },
+  { name: "美式咖啡", price: 15.0, calories: 15, tags: ["咖啡", "饮料"], periods: ["早餐", "下午茶", "全天"] },
+  { name: "猪柳蛋麦满分", price: 17.5, calories: 400, tags: ["鸡蛋", "早餐"], periods: ["早餐"] },
+  { name: "蛋挞", price: 8.0, calories: 220, tags: ["甜品"], periods: ["早餐", "下午茶", "全天"] },
+  { name: "香芋派", price: 9.5, calories: 250, tags: ["甜品"], periods: ["早餐", "下午茶", "全天"] },
+  { name: "麦旋风(奥利奥)", price: 13.0, calories: 330, tags: ["甜品", "冰品"], periods: ["下午茶", "夜宵", "全天"] }
+];
+
+var DEMO_CART = {
+  items: [
+    { name: "麦辣鸡腿堡", price: 21.5, qty: 1 },
+    { name: "板烧鸡腿堡", price: 22.0, qty: 1 },
+    { name: "薯条(大)", price: 13.5, qty: 1 },
+    { name: "可口可乐(中)", price: 9.0, qty: 2 }
+  ],
+  coupons: [
+    { name: "满40减8", kind: "cash", value: 8.0, threshold: 40.0 },
+    { name: "满60减15", kind: "cash", value: 15.0, threshold: 60.0 },
+    { name: "满80减18", kind: "cash", value: 18.0, threshold: 80.0 },
+    { name: "全场85折", kind: "percent", value: 0.85, threshold: 30.0 },
+    { name: "饮品9折", kind: "percent", value: 0.9, threshold: 0.0 }
+  ],
+  addons: [
+    { name: "蛋挞", price: 8.0 },
+    { name: "麦乐鸡(5块)", price: 12.5 }
+  ]
+};
+
+var DEMO_ORDERS = [
+  { date: "2026-10-01T12:10:00", amount: 44.0, channel: "到店", items: [ { name: "麦辣鸡腿堡", price: 21.5, calories: 520, qty: 1 }, { name: "薯条(大)", price: 13.5, calories: 510, qty: 1 }, { name: "可口可乐(中)", price: 9.0, calories: 180, qty: 1 } ] },
+  { date: "2026-10-02T22:41:00", amount: 43.0, channel: "外送", items: [ { name: "麦香鱼", price: 20.0, calories: 380, qty: 1 }, { name: "美式咖啡", price: 15.0, calories: 15, qty: 1 }, { name: "蛋挞", price: 8.0, calories: 220, qty: 1 } ] },
+  { date: "2026-10-03T08:15:00", amount: 32.5, channel: "到店", items: [ { name: "猪柳蛋麦满分", price: 17.5, calories: 400, qty: 1 }, { name: "美式咖啡", price: 15.0, calories: 15, qty: 1 } ] },
+  { date: "2026-10-05T23:15:00", amount: 31.0, channel: "外送", items: [ { name: "麦乐鸡(5块)", price: 12.5, calories: 285, qty: 1 }, { name: "香芋派", price: 9.5, calories: 250, qty: 1 }, { name: "可口可乐(中)", price: 9.0, calories: 180, qty: 1 } ] },
+  { date: "2026-10-06T12:30:00", amount: 37.5, channel: "到店", items: [ { name: "巨无霸", price: 24.0, calories: 530, qty: 1 }, { name: "薯条(大)", price: 13.5, calories: 510, qty: 1 } ] },
+  { date: "2026-10-08T19:02:00", amount: 43.5, channel: "外送", items: [ { name: "板烧鸡腿堡", price: 22.0, calories: 430, qty: 1 }, { name: "麦乐鸡(5块)", price: 12.5, calories: 285, qty: 1 }, { name: "可口可乐(中)", price: 9.0, calories: 180, qty: 1 } ] },
+  { date: "2026-10-09T00:32:00", amount: 22.5, channel: "外送", items: [ { name: "双层吉士堡", price: 14.5, calories: 480, qty: 1 }, { name: "蛋挞", price: 8.0, calories: 220, qty: 1 } ] },
+  { date: "2026-10-11T15:20:00", amount: 28.0, channel: "到店", items: [ { name: "麦旋风(奥利奥)", price: 13.0, calories: 330, qty: 1 }, { name: "美式咖啡", price: 15.0, calories: 15, qty: 1 } ] },
+  { date: "2026-10-12T21:58:00", amount: 50.0, channel: "外送", items: [ { name: "麦辣鸡腿堡", price: 21.5, calories: 520, qty: 1 }, { name: "薯条(大)", price: 13.5, calories: 510, qty: 1 }, { name: "美式咖啡", price: 15.0, calories: 15, qty: 1 } ] },
+  { date: "2026-10-14T12:05:00", amount: 31.0, channel: "到店", items: [ { name: "板烧鸡腿堡", price: 22.0, calories: 430, qty: 1 }, { name: "可口可乐(中)", price: 9.0, calories: 180, qty: 1 } ] },
+  { date: "2026-10-16T19:30:00", amount: 52.5, channel: "外送", items: [ { name: "麦辣鸡腿堡", price: 21.5, calories: 520, qty: 1 }, { name: "麦乐鸡(5块)", price: 12.5, calories: 285, qty: 1 }, { name: "香芋派", price: 9.5, calories: 250, qty: 1 }, { name: "可口可乐(中)", price: 9.0, calories: 180, qty: 1 } ] },
+  { date: "2026-10-18T22:07:00", amount: 47.0, channel: "外送", items: [ { name: "巨无霸", price: 24.0, calories: 530, qty: 1 }, { name: "蛋挞", price: 8.0, calories: 220, qty: 1 }, { name: "美式咖啡", price: 15.0, calories: 15, qty: 1 } ] },
+  { date: "2026-10-19T12:22:00", amount: 33.5, channel: "到店", items: [ { name: "麦香鱼", price: 20.0, calories: 380, qty: 1 }, { name: "薯条(大)", price: 13.5, calories: 510, qty: 1 } ] },
+  { date: "2026-10-21T08:05:00", amount: 32.5, channel: "到店", items: [ { name: "猪柳蛋麦满分", price: 17.5, calories: 400, qty: 1 }, { name: "美式咖啡", price: 15.0, calories: 15, qty: 1 } ] },
+  { date: "2026-10-23T19:11:00", amount: 34.5, channel: "外送", items: [ { name: "麦辣鸡腿堡", price: 21.5, calories: 520, qty: 1 }, { name: "麦旋风(奥利奥)", price: 13.0, calories: 330, qty: 1 } ] },
+  { date: "2026-10-25T23:44:00", amount: 36.0, channel: "外送", items: [ { name: "双层吉士堡", price: 14.5, calories: 480, qty: 1 }, { name: "麦乐鸡(5块)", price: 12.5, calories: 285, qty: 1 }, { name: "可口可乐(中)", price: 9.0, calories: 180, qty: 1 } ] },
+  { date: "2026-10-27T15:40:00", amount: 23.0, channel: "到店", items: [ { name: "美式咖啡", price: 15.0, calories: 15, qty: 1 }, { name: "蛋挞", price: 8.0, calories: 220, qty: 1 } ] },
+  { date: "2026-10-29T12:00:00", amount: 40.5, channel: "到店", items: [ { name: "板烧鸡腿堡", price: 22.0, calories: 430, qty: 1 }, { name: "可口可乐(中)", price: 9.0, calories: 180, qty: 1 }, { name: "香芋派", price: 9.5, calories: 250, qty: 1 } ] }
+];
+
+var PERSONA_LIB = {
+  midnight_believer: { name: "深夜麦门信徒", rule: "夜间订单占比 ≥ 30%", tagline: "城市的灯火一盏盏熄灭，你的麦门之火越烧越旺。", roasts: ["这个点还在下单的，不是饿，是信仰。", "白天属于老板，深夜属于麦乐鸡。"] },
+  coffee_survivor: { name: "早八咖啡续命人", rule: "含咖啡订单占比 ≥ 25%", tagline: "早八的魂，是美式给的。", roasts: ["你的血液里流的是美式，只是偶尔掺点可乐。", "别人靠闹钟醒来，你靠咖啡因醒来。"] },
+  budget_master: { name: "穷鬼套餐收藏家", rule: "单均消费 ≤ ¥15", tagline: "不是没钱，是每一分都花在刀刃上。", roasts: ["麦当劳的价格体系，被你研究得比价目表还透。", "穷鬼套餐？不，这是平民美食家的胜利。"] },
+  calorie_bomber: { name: "热量炸弹体验官", rule: "单均热量 ≥ 800 千卡", tagline: "减肥是明天的事，快乐是现在的事。", roasts: ["你一个人，养活了麦当劳半个供应链。", "建议下次单点一份沙拉，然后不加酱。"] },
+  party_king: { name: "聚餐买单王", rule: "大额订单（≥¥60）占比 ≥ 30%", tagline: "一个人点出三个人的量，朋友眼里你就是财神。", roasts: ["拼单群里，你永远是被 @ 最多的那个。", "你不是在点单，你是在做慈善（对室友而言）。"] },
+  orthodox: { name: "麦门原教旨主义者", rule: "头号单品占比 ≥ 40%", tagline: "菜单翻来翻去，最后点的还是那一个。", roasts: ["从一而终，麦门认证。", "新品出了三十个，你的信仰只有一个。"] },
+  explorer: { name: "麦门探险家", rule: "点过 ≥ 8 种不同单品", tagline: "菜单就是你的藏宝图，出新品你永远第一个到。", roasts: ["麦当劳产品经理应该给你发工资。", "你的胃，是一部麦门编年史。"] },
+  balanced: { name: "麦门均衡信徒", rule: "以上规则均未命中，兜底人格", tagline: "不偏科、不极端，稳中带皮。", roasts: ["各项指标均衡，麦门里的六边形战士。", "没有明显黑历史，也没有明显传奇，安心吃。"] }
+};
+
+function round2(x) { return Math.round((x + Number.EPSILON) * 100) / 100; }
+function round1(x) { return Math.round((x + Number.EPSILON) * 10) / 10; }
+function num(v, d) { var n = parseFloat(v); return isNaN(n) ? (d || 0) : n; }
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    var t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function filterCandidates(cands, c) {
+  var pool = [];
+  for (var i = 0; i < cands.length; i++) {
+    var it = cands[i];
+    if (c.budget != null && it.price > c.budget) continue;
+    if (c.maxCalories != null && it.calories != null && it.calories > c.maxCalories) continue;
+    if (c.excludeTags.length && (it.tags || []).some(function (t) { return c.excludeTags.indexOf(t) !== -1; })) continue;
+    if (c.period && (it.periods || ["全天"]).indexOf(c.period) === -1) continue;
+    pool.push(it);
+  }
+  return pool;
+}
+
+function smartScore(item, budget, recent) {
+  var score = 1.0;
+  if (item.calories != null) score += 0.3 * (1 - Math.min(item.calories / 800, 1));
+  if (budget != null && item.price <= budget * 0.7) score += 0.2;
+  if ((item.tags || []).indexOf("饮料") !== -1) score -= 0.35;
+  if ((item.tags || []).indexOf("甜品") !== -1) score -= 0.15;
+  if (recent.indexOf(item.name) !== -1) score -= 0.5;
+  return score;
+}
+
+function pickMeal(cands, constraints, mode, seed) {
+  var pool = filterCandidates(cands, constraints);
+  if (!pool.length) return { error: "没有单品符合当前约束", suggestion: "放宽预算/热量上限，或减少忌口标签后重试" };
+  var recent = constraints.recent || [];
+  var rng = mulberry32(seed || 1);
+  var pick, reason, alternatives;
+  if (mode === "dice") {
+    var fresh = pool.filter(function (i) { return recent.indexOf(i.name) === -1; });
+    var arr = fresh.length ? fresh : pool;
+    pick = arr[Math.floor(rng() * arr.length)];
+    reason = (recent.length && recent.indexOf(pick.name) === -1)
+      ? "盲盒模式：从 " + pool.length + " 个合格单品中随机摇出，且避开了最近吃过的，手气不错。"
+      : "盲盒模式：从 " + pool.length + " 个合格单品中随机摇出，祝用餐愉快。";
+    alternatives = pool.filter(function (i) { return i.name !== pick.name; }).slice(0, 3);
+  } else {
+    var ranked = pool.slice().sort(function (a, b) { return smartScore(b, constraints.budget, recent) - smartScore(a, constraints.budget, recent); });
+    pick = ranked[0];
+    var bits = [];
+    if (recent.length) bits.push(recent.indexOf(pick.name) !== -1 ? "虽然最近吃过，但综合条件还是它最合适" : "本周还没吃过，换个口味");
+    if (pick.calories != null) bits.push(pick.calories <= 600 ? "热量 " + pick.calories + " 千卡，负担适中" : "热量 " + pick.calories + " 千卡，适合放开吃");
+    if (constraints.budget != null && pick.price <= constraints.budget) bits.push("¥" + pick.price.toFixed(1) + " 在预算 ¥" + constraints.budget + " 内");
+    reason = "合格池 " + pool.length + " 个单品中综合得分最高：" + bits.join("，") + "。";
+    alternatives = ranked.slice(1, 4);
+  }
+  return { pick: pick, reason: reason, alternatives: alternatives, poolSize: pool.length, mode: mode };
+}
+
+function optimizeCart(items, coupons, addons) {
+  var base = round2(items.reduce(function (s, i) { return s + i.price * (i.qty || 1); }, 0));
+  var steps = [], used = [];
+
+  var cashCoupons = coupons.filter(function (c) { return c.kind === "cash" && base >= c.threshold; })
+    .sort(function (a, b) { return b.value - a.value; });
+  var cashSum = 0;
+  cashCoupons.forEach(function (c) {
+    cashSum += c.value;
+    used.push(c.name);
+    steps.push("使用「" + c.name + "」：满 " + c.threshold + " 减 " + c.value + "，省 ¥" + c.value.toFixed(2));
+  });
+
+  var subtotal = round2(base - cashSum);
+
+  var percentCoupons = coupons.filter(function (c) { return c.kind === "percent" && subtotal >= c.threshold; })
+    .sort(function (a, b) { return a.value - b.value; });
+  var final = subtotal;
+  if (percentCoupons.length) {
+    var best = percentCoupons[0];
+    var off = round2(subtotal * (1 - best.value));
+    final = round2(subtotal - off);
+    used.push(best.name);
+    steps.push("使用「" + best.name + "」：满 " + best.threshold + " 打 " + (best.value * 10) + " 折，再省 ¥" + off.toFixed(2));
+  }
+
+  var saved = round2(base - final);
+  var rate = base ? round1(saved / base * 100) : 0;
+  return { base: base, final: final, saved: saved, savedRate: rate, steps: steps, usedCoupons: used, suggestions: buildSuggestions(coupons, base, addons, used) };
+}
+
+function buildSuggestions(coupons, base, addons, used) {
+  var suggestions = [];
+  coupons.forEach(function (c) {
+    if (c.kind !== "cash" || base >= c.threshold || used.indexOf(c.name) !== -1) return;
+    var gap = round2(c.threshold - base);
+    if (gap > 20) return;
+    if (!addons.length) return;
+    var cheapest = addons.reduce(function (a, b) { return a.price <= b.price ? a : b; });
+    if (cheapest.price >= gap) {
+      var net = round2(c.value - cheapest.price);
+      if (net > 0) suggestions.push("加购「" + cheapest.name + "」(¥" + cheapest.price.toFixed(1) + ") 即可用「" + c.name + "」，净省约 ¥" + net.toFixed(2));
+      else suggestions.push("加购「" + cheapest.name + "」(¥" + cheapest.price.toFixed(1) + ") 可用「" + c.name + "」省 ¥" + c.value + "，但加购本身要 ¥" + cheapest.price.toFixed(1) + "，不划算");
+    } else {
+      suggestions.push("距「" + c.name + "」还差 ¥" + gap.toFixed(2) + "，最小加购「" + cheapest.name + "」也要 ¥" + cheapest.price.toFixed(1) + "，补不上，不建议凑单");
+    }
+  });
+  return suggestions;
+}
+
+var COFFEE_KEYS = ["咖啡", "美式", "拿铁", "摩卡", "澳白"];
+
+function calcStreak(dates) {
+  if (!dates.length) return 0;
+  var ordered = dates.slice().sort();
+  var best = 1, cur = 1;
+  for (var i = 1; i < ordered.length; i++) {
+    var prev = new Date(ordered[i - 1] + "T00:00:00").getTime();
+    var nxt = new Date(ordered[i] + "T00:00:00").getTime();
+    cur = (nxt - prev === 86400000) ? cur + 1 : 1;
+    if (cur > best) best = cur;
+  }
+  return best;
+}
+
+function computeStats(orders) {
+  var totalSpend = round2(orders.reduce(function (s, o) { return s + o.amount; }, 0));
+  var count = orders.length;
+  var avgOrder = count ? round2(totalSpend / count) : 0;
+
+  var itemCount = new Map(), itemSpend = new Map();
+  var orderCals = [], night = 0, coffeeOrders = 0, big = 0;
+  var weekdays = new Map(), dates = [];
+
+  orders.forEach(function (o) {
+    var dt = new Date(o.date);
+    var h = dt.getHours();
+    if (h >= 21 || h < 4) night++;
+    if (o.amount >= 60) big++;
+    var wd = "周" + "日一二三四五六"[dt.getDay()];
+    weekdays.set(wd, (weekdays.get(wd) || 0) + 1);
+    var day = o.date.slice(0, 10);
+    if (dates.indexOf(day) === -1) dates.push(day);
+    var calSum = 0, hasCal = false, hasCoffee = false;
+    (o.items || []).forEach(function (it) {
+      var qty = it.qty || 1;
+      itemCount.set(it.name, (itemCount.get(it.name) || 0) + qty);
+      itemSpend.set(it.name, (itemSpend.get(it.name) || 0) + (it.price || 0) * qty);
+      if (it.calories != null) { calSum += it.calories * qty; hasCal = true; }
+      if (COFFEE_KEYS.some(function (k) { return it.name.indexOf(k) !== -1; })) hasCoffee = true;
+    });
+    if (hasCal) orderCals.push(calSum);
+    if (hasCoffee) coffeeOrders++;
+  });
+
+  var totalItems = 0;
+  itemCount.forEach(function (v) { totalItems += v; });
+  var topItems = Array.from(itemCount.entries())
+    .sort(function (a, b) { return b[1] - a[1]; })
+    .map(function (e) { return { name: e[0], count: e[1], spend: round2(itemSpend.get(e[0])) }; });
+  var busiestEntry = Array.from(weekdays.entries()).sort(function (a, b) { return b[1] - a[1]; })[0];
+
+  return {
+    orderCount: count,
+    totalSpend: totalSpend,
+    avgOrder: avgOrder,
+    avgCalories: orderCals.length ? round1(orderCals.reduce(function (a, b) { return a + b; }, 0) / orderCals.length) : null,
+    nightRatio: count ? night / count : 0,
+    coffeeRatio: count ? coffeeOrders / count : 0,
+    bigOrderRatio: count ? big / count : 0,
+    uniqueItems: itemCount.size,
+    totalItemCount: totalItems,
+    topItemRatio: totalItems ? topItems[0].count / totalItems : 0,
+    topItems: topItems,
+    busiestWeekday: busiestEntry ? busiestEntry[0] : "-",
+    maxStreak: calcStreak(dates)
+  };
+}
+
+function matchPersona(s) {
+  var rules = [
+    ["midnight_believer", function () { return s.orderCount > 0 && s.nightRatio >= 0.3; }],
+    ["coffee_survivor", function () { return s.orderCount > 0 && s.coffeeRatio >= 0.25; }],
+    ["budget_master", function () { return s.orderCount > 0 && s.avgOrder <= 15; }],
+    ["calorie_bomber", function () { return s.avgCalories != null && s.avgCalories >= 800; }],
+    ["party_king", function () { return s.orderCount > 0 && s.bigOrderRatio >= 0.3; }],
+    ["orthodox", function () { return s.totalItemCount > 0 && s.topItemRatio >= 0.4; }],
+    ["explorer", function () { return s.uniqueItems >= 8; }]
+  ];
+  for (var i = 0; i < rules.length; i++) {
+    if (rules[i][1]()) return { id: rules[i][0], info: PERSONA_LIB[rules[i][0]] };
+  }
+  return { id: "balanced", info: PERSONA_LIB.balanced };
+}
+
+if (typeof document !== "undefined") (function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var state = {
+    items: [], coupons: [], addons: [],
+    meal: { budget: 30, maxCalories: null, excludeTags: [], period: "", recent: [], mode: "smart", seed: 7 }
+  };
+
+  document.querySelectorAll(".tab").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".tab").forEach(function (b) { b.classList.remove("active"); });
+      document.querySelectorAll(".panel").forEach(function (p) { p.classList.remove("active"); });
+      btn.classList.add("active");
+      $("tab-" + btn.dataset.tab).classList.add("active");
+    });
+  });
+
+  function rowHtml(kind, idx, row) {
+    if (kind === "item") {
+      return "<tr>" +
+        '<td><input type="text" value="' + esc(row.name) + '" data-k="' + kind + '" data-i="' + idx + '" data-f="name"></td>' +
+        '<td><input type="number" min="0" step="0.5" value="' + row.price + '" data-k="' + kind + '" data-i="' + idx + '" data-f="price"></td>' +
+        '<td><input type="number" min="1" step="1" value="' + (row.qty || 1) + '" data-k="' + kind + '" data-i="' + idx + '" data-f="qty"></td>' +
+        '<td><button class="row-del" data-k="' + kind + '" data-i="' + idx + '">✕</button></td></tr>';
+    }
+    if (kind === "coupon") {
+      return "<tr>" +
+        '<td><input type="text" value="' + esc(row.name) + '" data-k="' + kind + '" data-i="' + idx + '" data-f="name"></td>' +
+        '<td><select data-k="' + kind + '" data-i="' + idx + '" data-f="kind">' +
+        '<option value="cash"' + (row.kind === "cash" ? " selected" : "") + ">满减券</option>" +
+        '<option value="percent"' + (row.kind === "percent" ? " selected" : "") + ">折扣券</option></select></td>" +
+        '<td><input type="number" min="0" step="1" value="' + row.threshold + '" data-k="' + kind + '" data-i="' + idx + '" data-f="threshold"></td>' +
+        '<td><input type="number" min="0" step="0.01" value="' + row.value + '" data-k="' + kind + '" data-i="' + idx + '" data-f="value"></td>' +
+        '<td><button class="row-del" data-k="' + kind + '" data-i="' + idx + '">✕</button></td></tr>';
+    }
+    return "<tr>" +
+      '<td><input type="text" value="' + esc(row.name) + '" data-k="' + kind + '" data-i="' + idx + '" data-f="name"></td>' +
+      '<td><input type="number" min="0" step="0.5" value="' + row.price + '" data-k="' + kind + '" data-i="' + idx + '" data-f="price"></td>' +
+      '<td></td><td><button class="row-del" data-k="' + kind + '" data-i="' + idx + '">✕</button></td></tr>';
+  }
+
+  function renderTable(kind, tbodyId, rows) {
+    var html = "";
+    for (var i = 0; i < rows.length; i++) html += rowHtml(kind, i, rows[i]);
+    $(tbodyId).innerHTML = html || '<tr><td colspan="4" style="color:#8A8378;font-size:13px">（空）点击下方按钮添加</td></tr>';
+  }
+
+  function bindTableEvents() {
+    document.querySelectorAll("input[data-k], select[data-k]").forEach(function (el) {
+      var handler = function () {
+        var arr = state[el.dataset.k === "item" ? "items" : el.dataset.k === "coupon" ? "coupons" : "addons"];
+        var row = arr[+el.dataset.i];
+        if (!row) return;
+        var f = el.dataset.f;
+        row[f] = (f === "name" || f === "kind") ? el.value : num(el.value, 0);
+        renderCouponResult();
+      };
+      el.addEventListener("input", handler);
+      el.addEventListener("change", handler);
+    });
+    document.querySelectorAll(".row-del").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var arr = state[btn.dataset.k === "item" ? "items" : btn.dataset.k === "coupon" ? "coupons" : "addons"];
+        arr.splice(+btn.dataset.i, 1);
+        renderCart();
+      });
+    });
+  }
+
+  function renderCart() {
+    renderTable("item", "cart-items", state.items);
+    renderTable("coupon", "cart-coupons", state.coupons);
+    renderTable("addon", "cart-addons", state.addons);
+    bindTableEvents();
+    renderCouponResult();
+  }
+
+  function renderCouponResult() {
+    var box = $("coupon-result");
+    if (!state.items.length) { box.innerHTML = '<div class="card-title">神单方案</div><p class="hint">购物车为空，添加单品或载入示例后自动计算。</p>'; return; }
+    var r = optimizeCart(state.items, state.coupons, state.addons);
+    var html = '<div class="card-title">神单方案 <span class="hint" style="margin:0">逻辑与 scripts/coupon_optimizer.py 一致</span></div>';
+    html += '<div class="big-nums">' +
+      '<div class="big-num"><div class="k">原价</div><div class="v">¥' + r.base.toFixed(2) + "</div></div>" +
+      '<div class="big-num"><div class="k">券后</div><div class="v">¥' + r.final.toFixed(2) + "</div></div>" +
+      '<div class="big-num"><div class="k">节省</div><div class="v">¥' + r.saved.toFixed(2) + ' <small>' + r.savedRate + "%</small></div></div></div>";
+    if (r.steps.length) {
+      html += '<ol class="steps">';
+      r.steps.forEach(function (s, i) { html += '<li data-i="' + (i + 1) + '">' + esc(s) + "</li>"; });
+      html += "</ol>";
+    } else {
+      html += '<p class="hint">当前没有可用券，按原价下单。</p>';
+    }
+    if (r.suggestions.length) {
+      html += '<div class="suggest">凑单建议：' + r.suggestions.map(esc).join("<br>") + "</div>";
+    }
+    box.innerHTML = html;
+  }
+
+  $("cart-preset").addEventListener("click", function () {
+    state.items = DEMO_CART.items.map(function (i) { return Object.assign({}, i); });
+    state.coupons = DEMO_CART.coupons.map(function (c) { return Object.assign({}, c); });
+    state.addons = DEMO_CART.addons.map(function (a) { return Object.assign({}, a); });
+    renderCart();
+  });
+  $("cart-clear").addEventListener("click", function () { state.items = []; state.coupons = []; state.addons = []; renderCart(); });
+  $("cart-add").addEventListener("click", function () { state.items.push({ name: "", price: 0, qty: 1 }); renderCart(); });
+  $("coupon-preset").addEventListener("click", function () { state.coupons = DEMO_CART.coupons.map(function (c) { return Object.assign({}, c); }); renderCart(); });
+  $("coupon-clear").addEventListener("click", function () { state.coupons = []; renderCart(); });
+  $("coupon-add").addEventListener("click", function () { state.coupons.push({ name: "", kind: "cash", value: 5, threshold: 30 }); renderCart(); });
+  $("addon-clear").addEventListener("click", function () { state.addons = []; renderCart(); });
+  $("addon-add").addEventListener("click", function () { state.addons.push({ name: "", price: 0 }); renderCart(); });
+
+  var ALL_TAGS = [];
+  MENU.forEach(function (m) { (m.tags || []).forEach(function (t) { if (ALL_TAGS.indexOf(t) === -1) ALL_TAGS.push(t); }); });
+  $("meal-tags").innerHTML = ALL_TAGS.map(function (t) { return '<span class="chip" data-tag="' + esc(t) + '">' + esc(t) + "</span>"; }).join("");
+  document.querySelectorAll("#meal-tags .chip").forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      chip.classList.toggle("on");
+      var t = chip.dataset.tag, idx = state.meal.excludeTags.indexOf(t);
+      if (idx === -1) state.meal.excludeTags.push(t); else state.meal.excludeTags.splice(idx, 1);
+    });
+  });
+
+  $("menu-count").textContent = MENU.length;
+  $("menu-body").innerHTML = MENU.map(function (m) {
+    return "<tr><td>" + esc(m.name) + "</td><td>¥" + m.price.toFixed(1) + "</td><td>" + (m.calories != null ? m.calories + " 千卡" : "-") + "</td><td>" + (m.tags || []).map(esc).join("、") + "</td><td>" + (m.periods || []).join("/") + "</td></tr>";
+  }).join("");
+
+  function runMeal() {
+    var budget = num($("meal-budget").value, NaN);
+    var maxCal = num($("meal-cal").value, NaN);
+    var constraints = {
+      budget: isNaN(budget) || $("meal-budget").value === "" ? null : budget,
+      maxCalories: isNaN(maxCal) || $("meal-cal").value === "" ? null : maxCal,
+      excludeTags: state.meal.excludeTags,
+      period: $("meal-period").value,
+      recent: $("meal-recent").value.split(",").map(function (s) { return s.trim(); }).filter(Boolean)
+    };
+    var mode = document.querySelector('input[name="meal-mode"]:checked').value;
+    var seed = num($("meal-seed").value, 7);
+    var r = pickMeal(MENU, constraints, mode, seed);
+    var box = $("meal-result");
+    if (r.error) {
+      box.innerHTML = '<div class="card"><p class="err">' + esc(r.error) + "</p><p class=\"hint\">" + esc(r.suggestion) + "</p></div>";
+      return;
+    }
+    var alts = r.alternatives.map(function (a) { return esc(a.name) + "(¥" + a.price.toFixed(1) + ")"; }).join("、");
+    box.innerHTML = '<div class="pick-result">' +
+      '<div class="name">' + esc(r.pick.name) + "</div>" +
+      '<div class="meta">¥' + r.pick.price.toFixed(1) + " / " + (r.pick.calories != null ? r.pick.calories + " 千卡" : "热量未知") + " · " + esc(r.mode) + " 模式</div>" +
+      '<div class="reason">' + esc(r.reason) + "</div>" +
+      (alts ? '<div class="alts">备选方案：' + alts + "</div>" : "") +
+      '<div class="alts">合格池 ' + r.poolSize + "/" + MENU.length + " 个单品</div></div>";
+  }
+  $("meal-run").addEventListener("click", runMeal);
+  $("meal-reroll").addEventListener("click", function () {
+    document.querySelector('input[name="meal-mode"][value="dice"]').checked = true;
+    var seedInput = $("meal-seed");
+    seedInput.value = String(num(seedInput.value, 7) + 1);
+    runMeal();
+  });
+
+  function personaCardHtml(period, stats, persona) {
+    var info = persona.info;
+    var statCells = [
+      ["订单数", stats.orderCount + " 单"],
+      ["总消费", "¥" + stats.totalSpend.toFixed(2)],
+      ["单均消费", "¥" + stats.avgOrder.toFixed(2)]
+    ];
+    if (stats.avgCalories != null) statCells.push(["单均热量", Math.round(stats.avgCalories) + " 千卡"]);
+    statCells.push(["夜间订单占比", (stats.nightRatio * 100).toFixed(1) + "%"]);
+    statCells.push(["最勤工作日", stats.busiestWeekday]);
+    statCells.push(["最长连续打卡", stats.maxStreak + " 天"]);
+    statCells.push(["点过单品数", stats.uniqueItems + " 种"]);
+    var top = stats.topItems.slice(0, 3).map(function (t) {
+      return "<li><span>" + esc(t.name) + '</span><span class="cnt">× ' + t.count + " · ¥" + t.spend.toFixed(2) + "</span></li>";
+    }).join("");
+    return '<div class="pc-head"><div class="brand" style="display:flex;align-items:center;gap:10px;font-weight:500;font-size:15px">麦门认证 · MCDONALD\'S</div><div class="period" style="font-size:13px;color:#6B4E12;background:rgba(255,255,255,.55);border-radius:999px;padding:3px 12px">' + esc(period) + "</div></div>" +
+      '<div class="pc-body" style="background:#FFF;border:1px solid #EAE3D2;border-top:none;border-radius:0 0 12px 12px">' +
+      '<div class="pc-name">' + esc(info.name) + "</div>" +
+      '<div class="pc-tag">' + esc(info.tagline) + "</div>" +
+      '<div class="pc-roast">' + info.roasts.map(function (r) { return "<p>" + esc(r) + "</p>"; }).join("") + "</div>" +
+      '<div class="big-nums" style="margin-top:16px">' + statCells.map(function (c) { return '<div class="big-num"><div class="k">' + c[0] + '</div><div class="v">' + c[1] + "</div></div>"; }).join("") + "</div>" +
+      (top ? '<div class="steps" style="margin-top:14px"><li data-i="1" style="border-bottom:none">常驻嘉宾 TOP 3</li></div><ol class="steps">' + stats.topItems.slice(0, 3).map(function (t, i) { return '<li data-i="' + (i + 1) + '">' + esc(t.name) + ' <span style="color:#8A8378">× ' + t.count + " · ¥" + t.spend.toFixed(2) + "</span></li>"; }).join("") + "</ol>" : "") +
+      '<p class="hint" style="margin-top:14px">判定依据：' + esc(info.rule) + " · persona_id: " + esc(persona.id) + " · 截图这张卡即可分享</p></div>";
+  }
+
+  function runReport() {
+    var box = $("report-result");
+    var payload;
+    try {
+      payload = JSON.parse($("report-input").value);
+    } catch (e) {
+      box.innerHTML = '<div class="card"><p class="err">JSON 解析失败：' + esc(e.message) + "</p></div>";
+      return;
+    }
+    var orders = payload.orders || [];
+    if (!orders.length) {
+      box.innerHTML = '<div class="card"><p class="err">orders 为空，请检查数据。</p></div>';
+      return;
+    }
+    var period = payload.period || orders[0].date.slice(0, 7);
+    var stats = computeStats(orders);
+    var persona = matchPersona(stats);
+    box.innerHTML = '<div class="card"><div class="card-title">麦门月报 · ' + esc(period) + ' <span class="hint" style="margin:0">逻辑与 scripts/report_generator.py 一致</span></div>' +
+      '<div class="big-nums">' +
+      '<div class="big-num"><div class="k">订单数</div><div class="v">' + stats.orderCount + ' <small>单</small></div></div>' +
+      '<div class="big-num"><div class="k">总消费</div><div class="v">¥' + stats.totalSpend.toFixed(2) + "</div></div>" +
+      '<div class="big-num"><div class="k">单均</div><div class="v">¥' + stats.avgOrder.toFixed(2) + "</div></div>" +
+      '<div class="big-num"><div class="k">夜间订单占比</div><div class="v">' + (stats.nightRatio * 100).toFixed(1) + "%</div></div>" +
+      '<div class="big-num"><div class="k">最勤工作日</div><div class="v">' + esc(stats.busiestWeekday) + "</div></div>" +
+      '<div class="big-num"><div class="k">最长连续打卡</div><div class="v">' + stats.maxStreak + ' <small>天</small></div></div>' +
+      "</div></div>" +
+      '<div class="card" style="padding:0;overflow:hidden">' + personaCardHtml(period, stats, persona) + "</div>";
+  }
+  $("report-preset").addEventListener("click", function () {
+    $("report-input").value = JSON.stringify({ period: "2026-10", orders: DEMO_ORDERS }, null, 2);
+    runReport();
+  });
+  $("report-parse").addEventListener("click", runReport);
+
+  $("cart-preset").click();
+})();
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { MENU: MENU, DEMO_CART: DEMO_CART, DEMO_ORDERS: DEMO_ORDERS, PERSONA_LIB: PERSONA_LIB, round2: round2, filterCandidates: filterCandidates, smartScore: smartScore, pickMeal: pickMeal, optimizeCart: optimizeCart, computeStats: computeStats, matchPersona: matchPersona };
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# 生成的输出文件（examples/ 中的示例除外）
+/persona_card.html
+/card.html
+
+# 系统杂物
+.DS_Store
+Thumbs.db
+desktop.ini

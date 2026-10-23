@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>麦门人格鉴定卡 · 深夜麦门信徒</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #F3EDDF; min-height: 100vh; display: flex;
+  align-items: center; justify-content: center; padding: 32px 16px;
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+  color: #292929; line-height: 1.6;
+}
+.card { width: 100%; max-width: 720px; background: #FFFFFF; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(41, 41, 41, .12); }
+.card-head { background: #FFC72C; padding: 22px 28px; display: flex; align-items: center; justify-content: space-between; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 15px; letter-spacing: 1px; }
+.brand svg { display: block; }
+.period { font-size: 13px; color: #6B4E12; background: rgba(255,255,255,.55); border-radius: 999px; padding: 3px 12px; }
+.card-body { padding: 28px; }
+.persona-name { font-size: 34px; font-weight: 500; letter-spacing: 2px; }
+.persona-id { display: inline-block; margin-top: 6px; font-size: 12px; color: #8A8378; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.tagline { margin-top: 10px; font-size: 15px; color: #5C5548; }
+.roasts { margin-top: 16px; border-left: 4px solid #FFC72C; padding: 4px 0 4px 14px; }
+.roasts p { font-size: 14px; color: #4A4438; margin-top: 6px; }
+.roasts p:first-child { margin-top: 0; }
+.stats { margin-top: 22px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.stat { background: #FAF6EC; border: 1px solid #EFE7D2; border-radius: 12px; padding: 12px 14px; }
+.stat .k { font-size: 12px; color: #8A8378; }
+.stat .v { font-size: 20px; font-weight: 500; margin-top: 2px; }
+.top { margin-top: 22px; }
+.top h3 { font-size: 14px; font-weight: 500; color: #8A8378; }
+.top ol { margin-top: 8px; list-style: none; }
+.top li { display: flex; justify-content: space-between; font-size: 14px; padding: 8px 0; border-bottom: 1px dashed #EFE7D2; }
+.top li:last-child { border-bottom: none; }
+.top .cnt { color: #8A8378; font-size: 13px; }
+.card-foot { margin-top: 24px; padding-top: 16px; border-top: 1px solid #EFE7D2; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #8A8378; }
+.cert { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #292929; color: #FFC72C; border-radius: 6px; padding: 4px 10px; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="card-head">
+    <div class="brand"><svg width="34" height="26" viewBox="0 0 100 76" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 72 V44 Q14 12 38 12 Q62 12 62 44 V72" stroke="#292929" stroke-width="13" stroke-linecap="round"/><path d="M62 72 V44 Q62 12 86 12" stroke="#292929" stroke-width="13" stroke-linecap="round" fill="none"/></svg>麦门认证 · MCDONALD'S</div>
+    <div class="period">2026-10</div>
+  </div>
+  <div class="card-body">
+    <div class="persona-name">深夜麦门信徒</div>
+    <div class="persona-id">persona_id: midnight_believer</div>
+    <p class="tagline">城市的灯火一盏盏熄灭，你的麦门之火越烧越旺。</p>
+    <div class="roasts"><p>这个点还在下单的，不是饿，是信仰。</p><p>白天属于老板，深夜属于麦乐鸡。</p></div>
+    <div class="stats"><div class="stat"><div class="k">订单数</div><div class="v">18 单</div></div><div class="stat"><div class="k">总消费</div><div class="v">¥662.50</div></div><div class="stat"><div class="k">单均消费</div><div class="v">¥36.81</div></div><div class="stat"><div class="k">单均热量</div><div class="v">766 千卡</div></div><div class="stat"><div class="k">夜间订单占比</div><div class="v">33.3%</div></div><div class="stat"><div class="k">最勤工作日</div><div class="v">周五</div></div><div class="stat"><div class="k">最长连续打卡</div><div class="v">3 天</div></div><div class="stat"><div class="k">点过单品数</div><div class="v">13 种</div></div></div>
+    <div class="top">
+      <h3>本期常驻嘉宾 TOP 3</h3>
+      <ol><li><span>可口可乐(中)</span><span class="cnt">× 7 · ¥63.00</span></li><li><span>美式咖啡</span><span class="cnt">× 7 · ¥105.00</span></li><li><span>麦辣鸡腿堡</span><span class="cnt">× 4 · ¥86.00</span></li></ol>
+    </div>
+    <div class="card-foot">
+      <span>由麦门小助手生成 · 数据来自麦当劳 MCP</span>
+      <span class="cert">MCD-42EA26</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>
